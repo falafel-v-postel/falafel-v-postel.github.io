@@ -92,7 +92,7 @@ function create() {
     game.physics.arcade.gravity.y = 250;
 
     //The hero!
-    player = game.add.sprite(300, 250, 'dude');
+    player = game.add.sprite(300, 2850, 'dude');
     game.physics.enable(player, Phaser.Physics.ARCADE);
     
     player.body.bounce.y = 0.2;
@@ -138,25 +138,18 @@ function create() {
     rocketman2.start(false, 10000, 1000);
 
     //The astronaut
-    astronaut = game.add.sprite(0, 0, 'astronaut');
+    astronaut = game.add.sprite(0, 50, 'astronaut');
     game.physics.enable(astronaut, Phaser.Physics.ARCADE);
-    astronaut.fixedToCamera = true;
+    astronaut.fixedToCamera = false;
     astronaut.animations.add('fly', [ 0, 1, 2, 3, 4, 5, 6, 7 ], 5, true);
     astronaut.play('fly');
     astronaut.body.moves = false;
     //var tween = game.add.tween(astronaut).to( { x: 200 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
-    game.add.tween(astronaut.cameraOffset).to( { y: 400 }, 2000, Phaser.Easing.Quintic.InOut, true, 0, 2000, true);
-    
-    
-
-    
-    
-    
+    game.add.tween(astronaut.cameraOffset).to( { x: 1000 }, 10000, Phaser.Easing.Linear.None, true, 0, 2000, true);     
+        
     //astronaut.body.bounce.y = 0.2;
     //astronaut.body.collideWorldBounds = true;
     //astronaut.body.setSize(15, 38, 25, 16);
-
-
 
     // Music
     music = game.add.audio('lollybomb');
@@ -454,7 +447,7 @@ function restart () {
     //createAliens();
 
     //revives the player
-    player.reset(300, 250);
+    player.reset(300, 2850);
     //hides the text
     stateText.visible = false;
 
