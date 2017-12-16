@@ -2,7 +2,7 @@ import 'p2';
 import 'pixi';
 import Phaser from 'phaser';
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update, render: render });
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render });
 
 //game.state.add('boot', bootState);
 //game.state.add('load', loadState);
@@ -17,8 +17,6 @@ function preload() {
     game.load.tilemap('level1', '../assets/images/level1.json', null, Phaser.Tilemap.TILED_JSON);
     game.load.image('tiles-1', '../assets/images/tiles-1.png');
     game.load.spritesheet('dude', '../assets/images/trump.png', 66, 66);
-    //game.load.image('starSmall', '../assets/images/star.png');
-    //game.load.image('starBig', '../assets/images/star2.png');
     game.load.image('background', '../assets/images/background5.jpeg');
     game.load.spritesheet('bomb', '../assets/images/rocketman.png', 95, 72);
     game.load.spritesheet('bomb2', '../assets/images/rocketman2.png', 95, 72);
@@ -27,7 +25,8 @@ function preload() {
     game.load.audio('lollybomb', '../assets/audio/Little_Big_-_Lolly_Bomb.mp3');
     game.load.audio('intro', '../assets/audio/upinsmoke.mp3');   
     game.load.audio('crap', '../assets/audio/Craaaaaap.wav');
-    game.load.audio('doh', '../assets/audio/Doh.mp3');      
+    game.load.audio('doh', '../assets/audio/Doh.mp3');
+    game.load.audio('woohoo', '../assets/audio/woo.mp3');       
     game.load.audio('boom', '../assets/audio/bomb.mp3');         
     game.load.spritesheet('kaboom', '../assets/images/explosion.png', 128, 256);
     game.load.spritesheet('kaboom2', '../assets/images/explode.png', 128, 128);
@@ -46,6 +45,7 @@ var music2;
 var sound1;
 var sound2;
 var sound3;
+var sound4;
 var explosions;
 var explosions2;
 var player;
@@ -55,40 +55,28 @@ var rocketman2;
 var astronaut; 
 var explosion;
 var explosion2;
-var stateText;
+var loseText;
+var winText;
 
 function create() {
-
-    game.world.setBounds(0, 0, 1024, 3000);
-    //game.world.resize(0, 0, 1024, 5000);    
-    //game.add.tileSprite(0, 0, 1920, 1920, 'tiles-1');
+    //game.time.events.add(Phaser.Timer.SECOND * 4, restart, this);
     
-
+    game.world.setBounds(0, 0, 1024, 3000); 
     game.physics.startSystem(Phaser.Physics.ARCADE);
-
     game.stage.backgroundColor = '#000';
 
     bg = game.add.tileSprite(0, 0, 1024, 3000, 'background');
     bg.fixedToCamera = false;
  
     map = game.add.tilemap('level1');
-
     map.addTilesetImage('tiles-1');
-
     map.setCollisionByExclusion([ 13, 14, 15, 16, 46, 47, 48, 49, 50, 51 ]);
 
     layer = map.createLayer('Tile Layer 1');
-    layer.fixedToCamera = true;
-    
-
-    //  Un-comment this on to see the collision tiles
+    layer.fixedToCamera = true;    
     //layer.debug = true;
 
-    //layer.resizeWorld();
     cursors = game.input.keyboard.createCursorKeys();    
-    //game.input.onDown.add(resize, this);
-
-
     game.physics.arcade.gravity.y = 250;
 
     //The hero!
@@ -102,55 +90,41 @@ function create() {
     player.animations.add('left', [19, 20, 21, 22], 10, true);
     player.animations.add('turn', [5], 20, true);
     player.animations.add('right', [7, 8, 9, 10], 10, true);
-    //player.animations.add('kaboom');  
 
     game.camera.follow(player);
-    
-
     jumpButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     //Rocketman
     rocketman = game.add.emitter(680, game.world.top, 250);
     game.physics.enable(rocketman, Phaser.Physics.ARCADE);  
-    
     rocketman.makeParticles('bomb', [0], 5, true, true);
-    
     rocketman.minParticleSpeed.setTo(-200, -300);
     rocketman.maxParticleSpeed.setTo(200, -400);
     rocketman.gravity = 50;
     rocketman.bounce.setTo(0.4, 0.4);
     rocketman.angularDrag = 30;
-    
     rocketman.start(false, 10000, 1000);
 
     //Rocketman2
     rocketman2 = game.add.emitter(340, game.world.top, 250);
-    game.physics.enable(rocketman2, Phaser.Physics.ARCADE);  
-    
+    game.physics.enable(rocketman2, Phaser.Physics.ARCADE);    
     rocketman2.makeParticles('bomb2', [0], 5, true, true);
-    
     rocketman2.minParticleSpeed.setTo(-200, -300);
     rocketman2.maxParticleSpeed.setTo(200, -400);
     rocketman2.gravity = 50;
     rocketman2.bounce.setTo(0.4, 0.4);
-    rocketman2.angularDrag = 30;
-    
+    rocketman2.angularDrag = 30;    
     rocketman2.start(false, 10000, 1000);
 
     //The astronaut
-    astronaut = game.add.sprite(0, 50, 'astronaut');
+    astronaut = game.add.sprite(520, 50, 'astronaut');
     game.physics.enable(astronaut, Phaser.Physics.ARCADE);
     astronaut.fixedToCamera = false;
     astronaut.animations.add('fly', [ 0, 1, 2, 3, 4, 5, 6, 7 ], 5, true);
     astronaut.play('fly');
     astronaut.body.moves = false;
-    //var tween = game.add.tween(astronaut).to( { x: 200 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
-    game.add.tween(astronaut.cameraOffset).to( { x: 1000 }, 10000, Phaser.Easing.Linear.None, true, 0, 2000, true);     
-        
-    //astronaut.body.bounce.y = 0.2;
-    //astronaut.body.collideWorldBounds = true;
-    //astronaut.body.setSize(15, 38, 25, 16);
-
+    game.add.tween(astronaut.cameraOffset).to( { x: 100}, 10000, Phaser.Easing.Sinusoidal.InOut, true, 0, 2000, true);  
+  
     // Music
     music = game.add.audio('lollybomb');
     music.play();
@@ -161,20 +135,19 @@ function create() {
     music2 = game.add.audio('intro');
     music2.play();   
 
-    // Text
-    stateText = game.add.bitmapText(400, 300, 'k-font', "Sorry You Are Not a Winner! \n Click to restart", 48);
-    //text.x += (button.width / 2) - (text.textWidth / 2);
-    //stateText.anchor.x = 0.5;
-    //stateText.anchor.y = 0.5;
+    // Game over text
+    loseText = game.add.bitmapText(400, 300, 'k-font', "Sorry You Are Not a Winner! \n Click to restart", 64);
+    loseText.fixedToCamera = true;
+    loseText.cameraOffset.setTo(400, 300);    
+    loseText.anchor.setTo(0.5, 0.5);
+    loseText.visible = false;
 
-
-    //stateText = game.add.bitmapText(400, 300,'k-font', 64, 'center');
-    stateText.fixedToCamera = true;
-    stateText.cameraOffset.setTo(400, 300);  
-    
-    stateText.anchor.setTo(0.5, 0.5);
-    stateText.visible = false;
-
+    // Win text
+    winText = game.add.bitmapText(400, 300, 'k-font', "You Won, \n Click to restart", 64);
+    winText.fixedToCamera = true;
+    winText.cameraOffset.setTo(400, 300);    
+    winText.anchor.setTo(0.5, 0.5);
+    winText.visible = false;
 
     //  An explosion pool (player vs. rocketman2)
     explosions = game.add.group();
@@ -188,19 +161,7 @@ function create() {
     explosions2.createMultiple(30, 'kaboom2');
     explosions2.setAll('anchor.x', 0.5);
     explosions2.setAll('anchor.y', 0.5);
-    explosions2.forEach(rocketman => rocketman.animations.add('kaboom2'));
-    
-    
-    /**The enemy's bullets
-    enemyBullets = game.add.group();
-    enemyBullets.enableBody = true;
-    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
-    enemyBullets.createMultiple(30, 'bomb');
-    enemyBullets.setAll('anchor.x', 0.5);
-    enemyBullets.setAll('anchor.y', 1);
-    enemyBullets.setAll('outOfBoundsKill', true);
-    enemyBullets.setAll('checkWorldBounds', true);*/
-    
+    explosions2.forEach(rocketman => rocketman.animations.add('kaboom2'));    
 }
 
 function update() {
@@ -209,15 +170,12 @@ function update() {
     game.physics.arcade.overlap(rocketman, player, rocketmanHitsPlayer, null, this);
     game.physics.arcade.overlap(player, rocketman2, rocketman2HitsPlayer, null, this);
     game.physics.arcade.overlap(rocketman, rocketman2, rocketman2HitsRocketman, null, this);
-
-
+    game.physics.arcade.overlap(player, astronaut, playerTouchAstronaut, null, this);
+    
     game.physics.arcade.collide(player, layer);
     game.physics.arcade.collide(rocketman, player);
-    //game.physics.arcade.collide(rocketman2, player);
-    //game.physics.arcade.collide(rocketman, rocketman2);
     
-     player.body.velocity.x = 0;
-    
+    player.body.velocity.x = 0;    
 
     if (cursors.left.isDown)
     {
@@ -300,73 +258,13 @@ function changeVolume(pointer) {
         }
     
     }
-    
-/**function collisionHandler ('bomb', player) {
-        
-            //  When a bullet hits an alien we kill them both
-            'bomb'.kill();
-            player.kill();
-        
-            //  Increase the score
-            score += 20;
-            scoreText.text = scoreString + score;
-        
-            //  And create an explosion :)
-            var explosion = explosions.getFirstExists(false);
-            explosion.reset(player.body.x, player.body.y);
-            explosion.play('kaboom', 30, false, true);
-        
-            if (aliens.countLiving() == 0)
-            {
-                score += 1000;
-                scoreText.text = scoreString + score;
-        
-                enemyBullets.callAll('kill',this);
-                stateText.text = " You Won, \n Click to restart";
-                stateText.visible = true;
-        
-                //the "click to restart" handler
-                game.input.onTap.addOnce(restart,this);
-            }
-        
-}*/
 
 function rocketmanHitsPlayer (player,rocketman) {
-
     // Sound collision
     sound1 = game.add.audio('doh', 0.4, false);
     sound1.play();
-    //music2.loop(true);
-    
-            
-    /**rocketman.kill();
         
-    live = lives.getFirstAlive();
-        
-        if (live)
-            {
-            live.kill();
-            }
-        
-    //  And create an explosion :)
-    var explosion = explosions.getFirstExists(false);
-    explosion.reset(player);
-    explosion.play('kaboom', 30, false, true);
-        
-            //  When the player dies
-            if (lives.countLiving() < 1)
-            {
-                player.kill();
-                enemyBullets.callAll('kill');
-        
-                stateText.text=" GAME OVER \n Click to restart";
-                stateText.visible = true;
-        
-                //the "click to restart" handler
-                game.input.onTp.addOnce(restart,this);
-            }*/
-        
-        }
+    }
         
 function rocketman2HitsPlayer (player,rocketman2) {
     
@@ -374,8 +272,7 @@ function rocketman2HitsPlayer (player,rocketman2) {
     rocketman2.kill();
     player.kill();
         
-    /**live = lives.getFirstAlive();
-        
+    /**live = lives.getFirstAlive();        
         if (live)
             {
             live.kill();
@@ -386,25 +283,14 @@ function rocketman2HitsPlayer (player,rocketman2) {
     explosion.reset(player.body.x, player.body.y-player.body.height*1.5);
     explosion.play('kaboom', 10, false, true);
 
-    // Music explosions
+    // Sound and text effects, restart
     sound2 = game.add.audio('crap', 0.6);
     sound2.play();
-
+    music.destroy();   
+    loseText.visible = true;
+    game.input.onTap.addOnce(restart,this);    
         
-             //When the player dies
-            if (explosion.play)
-            {
-                player.kill();
-                //rocketman2.callAll('kill', this);
-        
-                //stateText.text="Sorry You're Not a Winner! \n Click to restart";
-                stateText.visible = true;
-        
-                //the "click to restart" handler
-                game.input.onTap.addOnce(restart,this);
-            }
-        
-        }
+    }
 
 function rocketman2HitsRocketman (rocketman,rocketman2) {
             
@@ -416,51 +302,50 @@ function rocketman2HitsRocketman (rocketman,rocketman2) {
     explosion2.reset(rocketman2.body.x+rocketman.body.width, rocketman2.body.y);
     explosion2.play('kaboom2', 30, false, true);
 
-    // Sound explosions
+    // Sound effects
     sound3 = game.add.audio('boom', 0.3);
     sound3.play();
+            
+    }
 
-        
-             //When the player dies
-             //if (explosion2.play)
-             //{
-                //rocketman.kill();
-                //enemyBullets.callAll('kill');
-        
-                //stateText.text=" GAME OVER \n Click to restart";
-                //stateText.visible = true;
-        
-                //the "click to restart" handler
-                //game.input.onTap.addOnce(restart,this);
-            //}
-        
-        }
+function playerTouchAstronaut (player,astronaut) {
+            
+    //rocketman.kill();
+    //rocketman2.kill();
+    player.kill();
+    astronaut.kill();
+     
+     // Sound and text effects, restart
+    sound4 = game.add.audio('woohoo', 1);
+    sound4.play();
+    music.destroy();            
+    winText.visible = true;
+    game.input.onTap.addOnce(restart,this);           
+         
+    }    
 
 function restart () {
-
-    //  A new level starts
-    
+   
     //resets the life count
     //lives.callAll('revive');
-    //  And brings the aliens back from the dead :)
-    //aliens.removeAll();
-    //createAliens();
+    //  And brings the rocketmans back from the dead :)
+    //rocketman.removeAll();
+    //createRocketman();
 
-    //revives the player
-    player.reset(300, 2850);
+    game.state.restart()
     //hides the text
-    stateText.visible = false;
+    loseText.visible = false;
+    winText.visible = false;    
 
 }
 
-
 function render () {
-
-    // game.debug.text(game.time.physicsElapsed, 32, 32);
-    // game.debug.body(player);
-    // game.debug.bodyInfo(player, 16, 24);
-    game.debug.cameraInfo(game.camera, 32, 32);
-    game.debug.spriteCoords(player, 32, 500);
+    //game.debug.text(game.time.physicsElapsed, 32, 32);
+    //game.debug.body(player);
+    //game.debug.bodyInfo(player, 16, 24);
+    //game.debug.text("Time until event: " + game.time.events.duration, 400, 300);   
+    //game.debug.cameraInfo(game.camera, 32, 32);
+    //game.debug.spriteCoords(player, 32, 500);
 
 }
 
