@@ -151,16 +151,6 @@ update() {
             this.facing = 'right';
         }
     }
-    else if (this.cursors.down.isDown)
-    {
-        this.player.body.velocity.y = 250;
-
-        if (this.facing != 'down')
-        {
-            this.player.animations.play('down');
-            this.facing = 'down';
-        }
-    }
     else
     {
         if (this.facing != 'idle')
@@ -178,8 +168,16 @@ update() {
 
             this.facing = 'idle';
         }
+    }    
+    if (this.cursors.down.isDown && !this.player.body.onFloor())
+    {
+        this.player.body.velocity.y = 250;
+
+        if (this.facing != 'down')
+        {
+            this.facing = 'down';
+        }
     }
-    
     if (this.jumpButton.isDown && this.player.body.onFloor() && this.game.time.now)
     {
         this.player.body.velocity.y = -250;
