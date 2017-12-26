@@ -34,6 +34,7 @@ create() {
 
     this.player.animations.add('left', [19, 20, 21, 22], 10, true);
     this.player.animations.add('turn', [5], 20, true);
+    this.player.animations.add('down', [5], 20, true);
     this.player.animations.add('right', [7, 8, 9, 10], 10, true);
 
     this.game.camera.follow(this.player);
@@ -150,6 +151,16 @@ update() {
             this.facing = 'right';
         }
     }
+    else if (this.cursors.down.isDown)
+    {
+        this.player.body.velocity.y = 250;
+
+        if (this.facing != 'down')
+        {
+            this.player.animations.play('down');
+            this.facing = 'down';
+        }
+    }
     else
     {
         if (this.facing != 'idle')
@@ -233,10 +244,6 @@ rocketman2HitsRocketman (rocketman,rocketman2) {
     // Sound effects
     this.sound3 = this.game.add.audio('boomSound', 0.3);
     this.sound3.play();
-    
-    if (this.explosion) {
-        this.sound3.mute = true;        
-    }
 }
 
 playerTouchAstronaut (player,astronaut) {            
