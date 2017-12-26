@@ -563,7 +563,7 @@ function reloadApp() {
   }
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, "?http://localhost:8081"))
+/* WEBPACK VAR INJECTION */}.call(exports, "?http://localhost:8080"))
 
 /***/ }),
 /* 7 */
@@ -113213,13 +113213,6 @@ process.umask = function() { return 0; };
                 this.player.animations.play('right');
                 this.facing = 'right';
             }
-        } else if (this.cursors.down.isDown) {
-            this.player.body.velocity.y = 250;
-
-            if (this.facing != 'down') {
-                this.player.animations.play('down');
-                this.facing = 'down';
-            }
         } else {
             if (this.facing != 'idle') {
                 this.player.animations.stop();
@@ -113231,6 +113224,14 @@ process.umask = function() { return 0; };
                 }
 
                 this.facing = 'idle';
+            }
+        }
+
+        if (this.cursors.down.isDown && !this.player.body.onFloor()) {
+            this.player.body.velocity.y = 250;
+
+            if (this.facing != 'down') {
+                this.facing = 'down';
             }
         }
 
