@@ -44,7 +44,7 @@ footer {
     max-height: 100px;
     height: 100px;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
 }
 
 footer > a {
